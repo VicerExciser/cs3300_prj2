@@ -1,0 +1,50 @@
+group 'edu.gatech.cs3300'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: "jacoco"
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compile 'org.xerial:sqlite-jdbc:3.8.10.1'
+
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.9.5"
+}
+
+task execute(type:JavaExec) {
+    standardInput = System.in
+    main = 'QuizApplication'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+jacoco {
+    toolVersion = "0.7.1.201405082137"
+    reportsDir = file("$buildDir/customJacocoReportDir")
+}
+
+jacocoTestReport {
+    reports {
+        xml.enabled false
+        csv.enabled false
+        html.destination "${buildDir}/jacocoHtml"
+    }
+}
+
+test {
+    jacoco {
+        append = false
+        destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
+        classDumpFile = file("$buildDir/jacoco/classpathdumps")
+    }
+    reports {
+        junitXml.enabled = false
+        html.enabled = true
+    }
+}
