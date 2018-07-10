@@ -7,14 +7,19 @@ import java.util.*;
 
 /**
  * CS3300 Project 2
+ *
+ * This class manages the data source
+ * (i.e., connections with the database and fetching info).
  */
 public class QuizDB {
     public List<String> getQuestionCategories() {
         Connection c = getConnection();
         List<String> categories = new ArrayList<>();
 
-        // Add code here
+//================== Add code here =============================================
 
+
+//==============================================================================
         return categories;
     }
 
@@ -22,8 +27,10 @@ public class QuizDB {
         Connection c = getConnection();
         List<Question> questions = new ArrayList<>();
 
-        // Add code here
+//================== Add code here =============================================
 
+
+//==============================================================================
         return questions;
     }
 
@@ -33,7 +40,7 @@ public class QuizDB {
             Class.forName("org.sqlite.JDBC");
             c = DriverManager.getConnection("jdbc:sqlite:quiz.db");
         } catch ( Exception e ) {
-            System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+            System.err.println( e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
         }
         return c;
