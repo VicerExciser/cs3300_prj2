@@ -84,13 +84,5 @@ public class QuizSession {
     public boolean solvedAll() {
         return questions.size() == userAnswers.size();
     }
-}
 
-    public int getScore() {
-        return 0;
-    }
-
-    public boolean solvedAll() {
-        return false;
-    }
 }
