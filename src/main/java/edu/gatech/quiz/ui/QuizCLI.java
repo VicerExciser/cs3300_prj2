@@ -55,29 +55,31 @@ public class QuizCLI {
             	System.out.println("\t" + optionNumber + ".)  " + o.getOptionText());
             	optionNumber++;
             }
-            int response = 0;	//cli.nextInt() - 1;
             String prompt = "\nPlease enter an answer ID from 1 to " + options.size() + ": ";
-            do {
-            	try {
-	            	System.out.print(prompt);
-	            	response = Integer.parseInt(cli.next()) - 1;
-            	} catch (NumberFormatException nfe) {
-            		response = 0;
-            	}
-            } while (response < 1 || response >= options.size());
+            int response = clampIndexResponse(1, options.size(), prompt, cli);
             Option answer = options.get(response);
             session.setUserAnswer(q, answer);
             System.out.println(barrier2);
     	}
     	int missed = session.getQuestions().size() - session.getScore();
-    	System.out.println("\n Final score:  " + session.getScore() + " correct / " + missed + " missed");
+    	System.out.println("\n*** Your score in this session:  " + session.getScore() + " correct / " + missed + " missed ***");
+    	System.out.println("\nPlease choose any of the following options: \n\t1) See explanations for missed"
+    			+ "\n\t2) Take a new quiz\n\t3) See Dashboard\n\t4) Quit\n");
+    	int choice = clampIndexResponse(1, 4, "Please choose your option {1 | 2 | 3 | 4}: ", cli);
+    	if (choice == 0) {
+    		displayExplanations();
+    	} else if (choice == 1) {
+    		this.run();
+    		return;
+    	} else if (choice == 2) {
+    		displayDashboard();
+    	}
     	System.out.println("Thanks for playing GeeQuiz!\n" + barrier1);
+    	return;
     }
     
     private boolean determineShortSession(Scanner cli) {
-//    	String sessString = "(L)ong session or (S)hort session? ";
     	String errMsg = "Please enter 'L' for a (L)ong quiz session or 'S' for only 10 (S)hort questions: ";
-//    	System.out.println(sessString);
     	System.out.print(errMsg);
     	String sessType = cli.next();
     	while (!"L".equalsIgnoreCase(sessType) && !"S".equalsIgnoreCase(sessType)) {
@@ -98,23 +100,35 @@ public class QuizCLI {
     		categoryNumber++;
     	}
     	categoryNumber--;
-    	String errMsg = "category ID must be an integer from 1 to " + categoryNumber + ": ";
-    	System.out.print("Please enter a category ID: ");
-    	int categoryId = 0;
-    	do {
-    		try {
-    			categoryId = Integer.parseInt(cli.next());
-    			if (categoryId < 1 || categoryId >= categoryNumber) {
-    				throw new NumberFormatException();
-    			}
-    		}
-    		catch (NumberFormatException nfe) {
-    			System.out.print(errMsg);
-    			categoryId = 0;
-    		}
-    	} while (categoryId < 1 || categoryId >= categoryNumber);
+    	String prompt = "Please enter a category ID from 1 to " + categoryNumber + ": ";
+    	int categoryId = clampIndexResponse(1, categoryNumber, prompt, cli);
     	System.out.println(barrier2);
-    	return categories.get(categoryId - 1); 
+    	return categories.get(categoryId); 
+    }
+    
+// ======================  TODO  ===================================
+    private void displayExplanations() {
+    	
+    }
+    
+    private void displayDashboard() {
+    	
+    }
+    
+ // ======================  TODO  ===================================
+    
+    // min and max are both exclusive, so (min=1, max=10) will return an index of [0 : 9]
+    private int clampIndexResponse(int min, int max, String prompt, Scanner cli) {
+    	int response = 0;
+    	do {
+        	try {
+            	System.out.print(prompt);
+            	response = Integer.parseInt(cli.next());
+        	} catch (NumberFormatException nfe) {
+        		response = 0;
+        	}
+        } while (response < min || response >= max);
+    	return response - 1;
     }
     
     // TODO: Maybe clean up how this handles specially formatted question body segments
