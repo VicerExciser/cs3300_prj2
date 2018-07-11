@@ -1,7 +1,6 @@
 package edu.gatech.quiz.data;
 
 import edu.gatech.quiz.helpers.*;
-
 import java.sql.*;
 import java.util.*;
 
