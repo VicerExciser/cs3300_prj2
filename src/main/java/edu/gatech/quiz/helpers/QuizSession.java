@@ -1,7 +1,6 @@
 package edu.gatech.quiz.helpers;
 
 import edu.gatech.quiz.data.QuizDB;
-
 import java.util.*;
 
 /**
@@ -10,6 +9,7 @@ import java.util.*;
 public class QuizSession {
     /*final*/ private List<Question> questions;
     /*final*/ private Map<Question, Option> userAnswers;
+    private int score;
 
     private QuizSession() {
         questions = new ArrayList<Question>();
@@ -20,15 +20,28 @@ public class QuizSession {
         QuizSession session = new QuizSession();
         List<Question> allQuestions = db.getCategoryQuestions(category);
 
-        // Add code here
-
+        int numQuestions = allQuestions.size();
+        int cap = numQuestions < 10 ? numQuestions : 10;
+        Random r = new Random();
+        List<Question> selectQuestions = new ArrayList<>();
+        for (int i = 0; i < cap; i++) {
+        	int index = r.nextInt(numQuestions);
+        	Question selected = allQuestions.get(index);
+        	if (!selectQuestions.contains(selected)) {
+        		selectQuestions.add(selected);
+        	}
+        }
+        session.setQuestions(selectQuestions);
+        session.setScore(0);
+        
         return session;
     }
 
     public static QuizSession createLongSession(String category, QuizDB db) {
         QuizSession session = new QuizSession();
 
-        // Add code here
+        session.setQuestions(db.getCategoryQuestions(category));
+        session.setScore(0);
 
         return session;
     }
@@ -55,7 +68,23 @@ public class QuizSession {
 
     public void setUserAnswer(Question q, Option o) {
         this.userAnswers.put(q, o);
+        if (o.isCorrect()) {
+        	this.score++;
+        }
     }
+
+    public int getScore() {
+        return this.score;
+    }
+    
+    public void setScore(int score) {
+    	this.score = score;
+    }
+
+    public boolean solvedAll() {
+        return questions.size() == userAnswers.size();
+    }
+}
 
     public int getScore() {
         return 0;
