@@ -9,7 +9,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 
-import java.util.List;
 import java.util.Scanner;
 
 
@@ -29,7 +28,7 @@ public class QuizExtraTests {
 
     @Test
     public void testClampIndexResponse_invalidInput() {
-        userInputMock.provideLines("0", "100", "meow", "3");
+        userInputMock.provideLines("0", "100", "asdf", "3");
         assertEquals(2, app.clampIndexResponse(
                 1, 9, "", new Scanner(System.in)));
     }
@@ -50,20 +49,20 @@ public class QuizExtraTests {
 
     @Test
     public void testDisplayCategoryMenu() {
-        userInputMock.provideLines("0", "15", "meow", "2");
+        userInputMock.provideLines("0", "15", "asdf", "2");
         String answer = "C++ Programming Mock Tests";
         assertEquals(answer, app.displayCategoryMenu(new Scanner(System.in)));
     }
 
     @Test
     public void testDetermineShortSession_true() {
-        userInputMock.provideLines("Z", "A", "C", "H", "7", "meow", "S");
+        userInputMock.provideLines("7", "asdf", "S");
         assertTrue(app.determineShortSession(new Scanner(System.in)));
     }
 
     @Test
     public void testDetermineShortSession_false() {
-        userInputMock.provideLines("Z", "A", "C", "H", "7", "meow", "L");
+        userInputMock.provideLines("7", "asdf", "L");
         assertFalse(app.determineShortSession(new Scanner(System.in)));
     }
 }
