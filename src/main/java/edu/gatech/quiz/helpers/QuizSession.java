@@ -10,38 +10,40 @@ public class QuizSession {
     /*final*/ private List<Question> questions;
     /*final*/ private Map<Question, Option> userAnswers;
     private int score;
+    private static final int SHORT_SESSION_LIMIT = 10;
 
     private QuizSession() {
-        questions = new ArrayList<Question>();
-        userAnswers = new HashMap<Question, Option>();
+        questions = new ArrayList<>();
+        userAnswers = new HashMap<>();
+        score = 0;
     }
 
     public static QuizSession createShortSession(String category, QuizDB db) {
         QuizSession session = new QuizSession();
         List<Question> allQuestions = db.getCategoryQuestions(category);
 
-        int numQuestions = allQuestions.size();
-        int cap = numQuestions < 10 ? numQuestions : 10;
-        Random r = new Random();
-        List<Question> selectQuestions = new ArrayList<>();
-        for (int i = 0; i < cap; i++) {
-        	int index = r.nextInt(numQuestions);
-        	Question selected = allQuestions.get(index);
-        	if (!selectQuestions.contains(selected)) {
-        		selectQuestions.add(selected);
-        	}
+        if (allQuestions.size() > SHORT_SESSION_LIMIT) {
+            int numQuestions = allQuestions.size();
+            Random r = new Random();
+            List<Question> selectQuestions = new ArrayList<>();
+            for (int i = 0; i < SHORT_SESSION_LIMIT; i++) {
+                int index = r.nextInt(numQuestions);
+                Question selected = allQuestions.get(index);
+                if (!selectQuestions.contains(selected)) {
+                    selectQuestions.add(selected);
+                }
+            }
+            session.questions = selectQuestions;
+        } else {
+            session.questions = allQuestions;
         }
-        session.setQuestions(selectQuestions);
-        session.setScore(0);
-        
         return session;
     }
 
     public static QuizSession createLongSession(String category, QuizDB db) {
         QuizSession session = new QuizSession();
 
-        session.setQuestions(db.getCategoryQuestions(category));
-        session.setScore(0);
+        session.questions = db.getCategoryQuestions(category);
 
         return session;
     }
@@ -50,39 +52,22 @@ public class QuizSession {
         return questions;
     }
 
-    public void setQuestions(List<Question> questions) {
-        this.questions = questions;
-    }
-
-    public Map<Question, Option> getUserAnswers() {
-        return userAnswers;
-    }
-
-    public void setUserAnswers(Map<Question, Option> userAnswers) {
-        this.userAnswers = userAnswers;
-    }
-
     public Option getUserAnswer(Question q) {
-        return this.userAnswers.get(q);
+        return userAnswers.get(q);
     }
 
     public void setUserAnswer(Question q, Option o) {
-        this.userAnswers.put(q, o);
+        userAnswers.put(q, o);
         if (o.isCorrect()) {
-        	this.score++;
+        	score++;
         }
     }
 
     public int getScore() {
-        return this.score;
-    }
-    
-    public void setScore(int score) {
-    	this.score = score;
+        return score;
     }
 
     public boolean solvedAll() {
         return questions.size() == userAnswers.size();
     }
-
 }
