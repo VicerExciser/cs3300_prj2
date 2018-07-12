@@ -1,0 +1,5 @@
+Tasks for Story Card 3
+
+1. Develop a dashboard for the app that lists the user's cumulative scores across different categories.
+
+2. Each score should be presented as #correct/#questions_in_category.

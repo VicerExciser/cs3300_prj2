@@ -1,0 +1,6 @@
+Tasks for Story Card 2
+
+1. For each quiz session, keep track of the user's answers.
+
+2. At the end of a quiz session, allow the user to review wrong answers and see an explanation
+   for the correct answer.
