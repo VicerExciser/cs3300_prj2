@@ -25,6 +25,7 @@ public class QuizCLI {
 	final private String endOptsPrompt = "Please choose your option {1 | 2 | 3 | 4}: ";
 	final private String thanksMsg = "\nThanks for playing GeeQuiz!\n";
 	
+	private Scanner cli;
 	private Map<String, String> dashReport;
 
     public static void main(String[] args) {
@@ -35,17 +36,18 @@ public class QuizCLI {
     public QuizCLI(QuizDB db) {
         this.db = db;
         this.dashReport = new HashMap<>();
+        this.cli = null;
     }
 
     public void run() {
-    	Scanner cli = new Scanner(System.in);
+    	cli = new Scanner(System.in);
     	// start session (determine if long or short)
-    	boolean shortType = determineShortSession(cli);
-    	String category = displayCategoryMenu(cli, db);
+    	boolean shortType = determineShortSession();
+    	String category = displayCategoryMenu();
     	QuizSession session = shortType ? QuizSession.createShortSession(category, db)
     			: QuizSession.createLongSession(category, db);
     	System.out.println("\t\t||  " + category + "  ||\n");
-    	startQuiz(session, cli);
+    	startQuiz(session);
     	
     	int userScore = session.getScore();
     	int totalQuestions = session.getQuestions().size();
@@ -57,13 +59,15 @@ public class QuizCLI {
     	System.out.println("\n***  Your score in this session:  " + userScore + " correct / " 
     			+ missed + " missed  ***");
 
-    	endOptionsMenu(cli);
+    	endOptionsMenu();
     	System.out.println(thanksMsg + barrier1);
-    	cli.close();
+    	try {
+    		cli.close();
+    	} catch (IllegalStateException e) {}
     	return;
     }
     
-    public boolean determineShortSession(Scanner cli) {
+    public boolean determineShortSession() {
     	System.out.print(sessionTypePrompt);
     	String sessType = cli.next();
     	while (!"L".equalsIgnoreCase(sessType) && !"S".equalsIgnoreCase(sessType)) {
@@ -73,7 +77,7 @@ public class QuizCLI {
     	return "S".equalsIgnoreCase(sessType);
     }
     
-    public String displayCategoryMenu(Scanner cli, QuizDB db) {
+    public String displayCategoryMenu() {
     	List<String> categories = db.getQuestionCategories();
     	int categoryNumber = 1;
     	System.out.println(barrier1 + welcomeMsg);
@@ -85,12 +89,12 @@ public class QuizCLI {
     	}
     	categoryNumber--;
     	String prompt = "Please enter a category ID from 1 to " + categoryNumber + ": ";
-    	int categoryId = clampIndexResponse(1, categoryNumber, prompt, cli);
+    	int categoryId = clampIndexResponse(1, categoryNumber, prompt);
     	System.out.println(barrier2);
     	return categories.get(categoryId); 
     }
     
-    public void startQuiz(QuizSession session, Scanner cli) {
+    public void startQuiz(QuizSession session) {
     	// prompt question (for each session.getQuestions())
     	// take answer input then call session.setUserAnswer(question, answer);
     	int questionNumber = 1;
@@ -114,7 +118,7 @@ public class QuizCLI {
             	optionNumber++;
             }
             String prompt = "\nPlease enter an answer ID from 1 to " + options.size() + ": ";
-            int response = clampIndexResponse(1, options.size(), prompt, cli);
+            int response = clampIndexResponse(1, options.size(), prompt);
             Option answer = options.get(response);
             session.setUserAnswer(q, answer);
             System.out.println(barrier2);
@@ -122,16 +126,16 @@ public class QuizCLI {
     	assert(session.solvedAll());
     }
     
-    public void endOptionsMenu(Scanner cli) {
+    public void endOptionsMenu() {
     	System.out.println(endOptions);
-    	int choice = clampIndexResponse(1, 4, endOptsPrompt, cli);
+    	int choice = clampIndexResponse(1, 4, endOptsPrompt);
     	if (choice == 0) {
     		displayExplanations();
     	} else if (choice == 1) {
     		this.run();
     		return;
     	} else if (choice == 2) {
-    		displayDashboard(cli);
+    		displayDashboard();
     	}
     }
     
@@ -140,7 +144,7 @@ public class QuizCLI {
     	
     }
     
-    public void displayDashboard(Scanner cli) {
+    public void displayDashboard() {
     	System.out.println("\nGeeQuiz: Dashboard");
     	int count = 1;
     	for (String category : dashReport.keySet()) {
@@ -150,13 +154,13 @@ public class QuizCLI {
     	System.out.println("\nPress Enter to return to the options menu");
     	try{System.in.read();}
     	catch(Exception e){}
-    	endOptionsMenu(cli);
+    	endOptionsMenu();
     }
     
  // ======================  TODO  ===================================
     
     // min and max are both exclusive, so (min=1, max=10) will return an index of [0 : 9]
-    public int clampIndexResponse(int min, int max, String prompt, Scanner cli) {
+    public int clampIndexResponse(int min, int max, String prompt) {
     	int response = 0;
     	do {
         	try {
