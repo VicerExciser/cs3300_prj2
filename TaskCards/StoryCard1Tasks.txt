@@ -1,0 +1,13 @@
+Tasks for Story Card 1
+
+1. Develop a class (QuizCLI) that, through a command line interface, allows the user
+   to take a short quiz session (up to 10 randomly picked questions).
+
+2. For each question, display the four possible answers, and allow the user to pick one.
+
+3. During the session, keep track of the number of correct answers given.
+
+4. At the end of the session, display the user's quiz score as #correct/#attempted.
+
+5. At the end of the session, give the user the option to see an explanation (of a wrong answer),
+   take a new quiz, see dashboard, or quit.
