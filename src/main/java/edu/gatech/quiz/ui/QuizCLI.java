@@ -127,7 +127,7 @@ public class QuizCLI {
         	} catch (NumberFormatException nfe) {
         		response = 0;
         	}
-        } while (response < min || response >= max);
+        } while (response < min || response > max);
     	return response - 1;
     }
     
