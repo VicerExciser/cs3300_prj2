@@ -25,6 +25,8 @@ public class QuizCLI {
 	final private String endOptsPrompt = "Please choose your option {1 | 2 | 3 | 4}: ";
 	final private String thanksMsg = "\nThanks for playing GeeQuiz!\n";
 
+	public QuizSession session;
+
 
 	private Map<String, String> dashReport;
 
@@ -43,7 +45,7 @@ public class QuizCLI {
 		// start session (determine if long or short)
 		boolean shortType = determineShortSession(cli);
 		String category = displayCategoryMenu(cli);
-		QuizSession session = shortType ? QuizSession.createShortSession(category, db)
+		session = shortType ? QuizSession.createShortSession(category, db)
 				: QuizSession.createLongSession(category, db);
 		System.out.println("\t\t||  " + category + "  ||\n");
 		startQuiz(session, cli);
@@ -129,7 +131,7 @@ public class QuizCLI {
 		System.out.println(endOptions);
 		int choice = clampIndexResponse(1, 4, endOptsPrompt, cli);
 		if (choice == 0) {
-			displayExplanations();
+			displayExplanations(cli);
 		} else if (choice == 1) {
 			this.run();
 			return;
@@ -139,8 +141,10 @@ public class QuizCLI {
 	}
 
 	// ======================  TODO  ===================================
-	public void displayExplanations() {
+	public void displayExplanations(Scanner cli) {
+        System.out.println("\ntesting explanation");
 
+        endOptionsMenu(cli);
 	}
 
 	public void displayDashboard(Scanner cli) {

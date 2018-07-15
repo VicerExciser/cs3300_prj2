@@ -1,4 +1,7 @@
 import edu.gatech.quiz.data.QuizDB;
+import edu.gatech.quiz.helpers.Option;
+import edu.gatech.quiz.helpers.Question;
+import edu.gatech.quiz.helpers.QuizSession;
 import edu.gatech.quiz.ui.QuizCLI;
 
 import static org.junit.Assert.*;
@@ -26,6 +29,7 @@ public class QuizExtraTests {
         app = new QuizCLI(db);
     }
 
+    //====================================== CLI TESTS ==========================
     @Test
     public void testClampIndexResponse_invalidInput() {
         userInputMock.provideLines("0", "100", "asdf", "3");
@@ -64,5 +68,33 @@ public class QuizExtraTests {
     public void testDetermineShortSession_false() {
         userInputMock.provideLines("7", "asdf", "L");
         assertFalse(app.determineShortSession(new Scanner(System.in)));
+    }
+
+    @Test
+    public void testQuizScorePlayThrough() {
+        // Plays a short session, providing correct answers.
+        userInputMock.provideLines("s", "7", "3", "3", "4", "4", "4");
+        app.run();
+        assertEquals(app.session.getScore(), 4);
+    }
+
+    @Test
+    public void testMissedQuestionExplanation() {
+        // Plays a short session, missing the first question.
+        // Chooses to view question 1's explanation.
+
+        String q1ExpectedExplanation = db.getCategoryQuestions(
+                "Theory of Computation Mock Tests").get(0).getExplanation();
+        String q1ActualExplanation = null;
+        userInputMock.provideLines("s", "7", "1", "3", "4", "4", "1", "4");
+        app.run();
+        for (Question q : app.session.getQuestions()) {
+            Option userAnswer = app.session.getUserAnswer(q);
+            if (!userAnswer.isCorrect()) {
+                q1ActualExplanation = q.getExplanation();
+            }
+        }
+        assertNotNull(q1ActualExplanation);
+        assertEquals(q1ExpectedExplanation, q1ActualExplanation);
     }
 }
