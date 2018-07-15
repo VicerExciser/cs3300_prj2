@@ -92,9 +92,24 @@ public class QuizExtraTests {
             Option userAnswer = app.session.getUserAnswer(q);
             if (!userAnswer.isCorrect()) {
                 q1ActualExplanation = q.getExplanation();
+                break;
             }
         }
         assertNotNull(q1ActualExplanation);
         assertEquals(q1ExpectedExplanation, q1ActualExplanation);
+    }
+
+    @Test
+    public void testCumulativeScoreAfterTwoSessions() {
+        // Plays a short session, missing one question the first time.
+        // Plays the same quiz again, this time providing a correct answer
+        // for the previously missed question.
+        String[] userInputs = {"s", "7", "1", "3", "4", "4", "2",      // quiz 1
+                               "s", "7", "3", "3", "4", "4", "4" };    // quiz 2
+        userInputMock.provideLines(userInputs);
+        app.run();
+        String actualCumulativeScore = app.dashReport.get("Theory of Computation Mock Tests");
+        String expectedCumulativeScore = "4/4";
+        assertEquals(expectedCumulativeScore, actualCumulativeScore);
     }
 }

@@ -26,9 +26,7 @@ public class QuizCLI {
 	final private String thanksMsg = "\nThanks for playing GeeQuiz!\n";
 
 	public QuizSession session;
-
-
-	private Map<String, String> dashReport;
+	public Map<String, String> dashReport;
 
 	public static void main(String[] args) {
 		// Provide menu driven quiz access via CLI
