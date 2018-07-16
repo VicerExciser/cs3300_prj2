@@ -12,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.java.lang.system.TextFromStandardInputStream;
 
+import java.util.Random;
 import java.util.Scanner;
 
 
@@ -111,5 +112,28 @@ public class QuizExtraTests {
         String actualCumulativeScore = app.dashReport.get("Theory of Computation Mock Tests");
         String expectedCumulativeScore = "4/4";
         assertEquals(expectedCumulativeScore, actualCumulativeScore);
+    }
+
+    @Test
+    public void testRandomShortSession() {
+        String[] userInput = new String[13];
+        Random rng = new Random();
+        userInput[0] = "s";            // short session
+        userInput[1] = String.valueOf(rng.nextInt(5) + 1); // random category
+        userInput[12] = "4";           // quit app
+        for (int i = 2; i < 12; i++) { // always select first answer
+            userInput[i] = "1";
+        }
+        userInputMock.provideLines(userInput);
+        app.run();
+        assertTrue(true); // no crash, no problem
+    }
+
+    @Test
+    public void test100RandomShortSessions() {
+        for (int i = 0; i < 100; i++) {
+            testRandomShortSession();
+            System.out.println(i);
+        }
     }
 }

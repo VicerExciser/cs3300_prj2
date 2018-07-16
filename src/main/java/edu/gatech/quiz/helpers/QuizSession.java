@@ -23,21 +23,21 @@ public class QuizSession {
         List<Question> allQuestions = db.getCategoryQuestions(category);
 
         if (allQuestions.size() > SHORT_SESSION_LIMIT) {
-            int numQuestions = allQuestions.size();
-            Random r = new Random();
-            List<Question> selectQuestions = new ArrayList<>();
-            for (int i = 0; i < SHORT_SESSION_LIMIT; i++) {
-                int index = r.nextInt(numQuestions);
-                Question selected = allQuestions.get(index);
-                if (!selectQuestions.contains(selected)) {
-                    selectQuestions.add(selected);
-                }
-            }
-            session.questions = selectQuestions;
+            session.questions = session.getShortRandomQuestionList(allQuestions);
         } else {
             session.questions = allQuestions;
         }
         return session;
+    }
+
+    private List<Question> getShortRandomQuestionList(List<Question> longQuestionList) {
+        Random rng = new Random();
+        List<Question> shortQuestionList = new ArrayList<>();
+        for (int i = 0; i < SHORT_SESSION_LIMIT; i++) {
+            shortQuestionList.add(longQuestionList.get(
+                    rng.nextInt(longQuestionList.size())));
+        }
+        return shortQuestionList;
     }
 
     public static QuizSession createLongSession(String category, QuizDB db) {
@@ -68,6 +68,6 @@ public class QuizSession {
     }
 
     public boolean solvedAll() {
-        return questions.size() == userAnswers.size();
+        return userAnswers.keySet().containsAll(questions);
     }
 }
