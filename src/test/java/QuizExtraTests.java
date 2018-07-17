@@ -87,7 +87,7 @@ public class QuizExtraTests {
         String q1ExpectedExplanation = db.getCategoryQuestions(
                 "Theory of Computation Mock Tests").get(0).getExplanation();
         String q1ActualExplanation = null;
-        userInputMock.provideLines("s", "7", "1", "3", "4", "4", "1", "4");
+        userInputMock.provideLines("s", "7", "1", "3", "4", "4", "1", "4", "4");
         app.run();
         for (Question q : app.session.getQuestions()) {
             Option userAnswer = app.session.getUserAnswer(q);
