@@ -11,176 +11,218 @@ import java.util.*;
  * Extra Credit will be given if the interface (IE this class) is implemented correctly.
  */
 public class QuizCLI {
-	final private QuizDB db;
-	final private String barrier1 = "======================================================================\n";
-	//    final private String barrier2 = "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
-	final private String barrier2 = "______________________________________________________________________\n";
-	final private String welcomeMsg = "Welcome to GeeQuiz, a Computer Science quiz app!\n\nPlease choose a "
-			+ "question category from the list below:";
-	final private String sessionTypePrompt = "Please enter 'L' for a (L)ong quiz session or 'S' for only 10 "
-			+ "(S)hort questions: ";
-	final private String endOptions = "\nPlease choose any of the following options: \n\t1) See explanations "
-			+ "for missed"
-			+ "\n\t2) Take a new quiz\n\t3) See Dashboard\n\t4) Quit\n";
-	final private String endOptsPrompt = "Please choose your option {1 | 2 | 3 | 4}: ";
-	final private String thanksMsg = "\nThanks for playing GeeQuiz!\n";
+    final private QuizDB db;
+    final private String barrier1 = "======================================================================\n";
+    //    final private String barrier2 = "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -\n";
+    final private String barrier2 = "______________________________________________________________________\n";
+    final private String welcomeMsg = "Welcome to GeeQuiz, a Computer Science quiz app!\n\nPlease choose a "
+    + "question category from the list below:";
+    final private String sessionTypePrompt = "Please enter 'L' for a (L)ong quiz session or 'S' for only 10 "
+    + "(S)hort questions: ";
+    final private String endOptions = "\nPlease choose any of the following options: \n\t1) See explanations "
+    + "for missed"
+    + "\n\t2) Take a new quiz\n\t3) See Dashboard\n\t4) Quit\n";
+    final private String endOptsPrompt = "Please choose your option {1 | 2 | 3 | 4}: ";
+    final private String thanksMsg = "\nThanks for playing GeeQuiz!\n";
 
-	public QuizSession session;
-	public Map<String, String> dashReport;
+    public QuizSession session;
+    public Map<String, String> dashReport;
 
-	public static void main(String[] args) {
-		// Provide menu driven quiz access via CLI
-		new QuizCLI(new QuizDB()).run();
-	}
+    public static void main(String[] args) {
+        // Provide menu driven quiz access via CLI
+        new QuizCLI(new QuizDB()).run();
+    }
 
-	public QuizCLI(QuizDB db) {
-		this.db = db;
-		this.dashReport = new HashMap<>();
-	}
+    public QuizCLI(QuizDB db) {
+        this.db = db;
+        this.dashReport = new HashMap<>();
+    }
 
-	public void run() {
-		Scanner cli = new Scanner(System.in);
-		// start session (determine if long or short)
-		boolean shortType = determineShortSession(cli);
-		String category = displayCategoryMenu(cli);
-		session = shortType ? QuizSession.createShortSession(category, db)
-				: QuizSession.createLongSession(category, db);
-		System.out.println("\t\t||  " + category + "  ||\n");
-		startQuiz(session, cli);
+    public void run() {
+        Scanner cli = new Scanner(System.in);
+        // start session (determine if long or short)
+        boolean shortType = determineShortSession(cli);
+        String category = displayCategoryMenu(cli);
+        session = shortType ? QuizSession.createShortSession(category, db)
+        : QuizSession.createLongSession(category, db);
+        System.out.println("\t\t||  " + category + "  ||\n");
+        startQuiz(cli);
 
-		int userScore = session.getScore();
-		int totalQuestions = session.getQuestions().size();
-		// Using a Map container to track user performance for each category quizzed
-		String answeredCorrect = userScore + "/" + totalQuestions;
-		dashReport.put(category, answeredCorrect);
+        int userScore = session.getScore();
+        int totalQuestions = session.getQuestions().size();
+        // Using a Map container to track user performance for each category quizzed
+        String answeredCorrect = userScore + "/" + totalQuestions;
+        dashReport.put(category, answeredCorrect);
 
-		int missed = totalQuestions - userScore;
-		System.out.println("\n***  Your score in this session:  " + userScore + " correct / " 
-				+ missed + " missed  ***");
-
-		endOptionsMenu(cli);
-		System.out.println(thanksMsg + barrier1);
-		try {
-			cli.close();
-		} catch (IllegalStateException e) {}
-		return;
-	}
-
-	public boolean determineShortSession(Scanner cli) {
-		System.out.print(sessionTypePrompt);
-		String sessType = cli.next();
-		while (!"L".equalsIgnoreCase(sessType) && !"S".equalsIgnoreCase(sessType)) {
-			System.out.print(sessionTypePrompt);
-			sessType = cli.next();
-		}
-		return "S".equalsIgnoreCase(sessType);
-	}
-
-	public String displayCategoryMenu(Scanner cli) {
-		List<String> categories = db.getQuestionCategories();
-		int categoryNumber = 1;
-		System.out.println(barrier1 + welcomeMsg);
-		for (String cat : categories) {
-			String prefix = categoryNumber < 10 ? (" \t" + categoryNumber + ")   ") 
-					: ("\t" + categoryNumber + ")  ");
-			System.out.println(prefix + cat);
-			categoryNumber++;
-		}
-		categoryNumber--;
-		String prompt = "Please enter a category ID from 1 to " + categoryNumber + ": ";
-		int categoryId = clampIndexResponse(1, categoryNumber, prompt, cli);
-		System.out.println(barrier2);
-		return categories.get(categoryId); 
-	}
-
-	public void startQuiz(QuizSession session, Scanner cli) {
-		// prompt question (for each session.getQuestions())
-		// take answer input then call session.setUserAnswer(question, answer);
-		int questionNumber = 1;
-		for (Question q : session.getQuestions()) {
-			List<Option> options = q.getOptions();
-			String text = q.getBodyText();
-			System.out.println("Question " + questionNumber + ": ");
-			questionNumber++;
-			//            System.out.println(Arrays.toString(text.split("(?s)(?<=\\G.{50})") + "\n"));
-			if (text.length() > 80) {
-				for (String line : splitTextEqually(text, 80)) {
-					System.out.println(" " + line);
-				}
-				System.out.println();
-			} else {
-				System.out.println(" " + text + "\n");
-			}
-			int optionNumber = 1;
-			for (Option o : options) {
-				System.out.println("\t" + optionNumber + ".)  " + o.getOptionText());
-				optionNumber++;
-			}
-			String prompt = "\nPlease enter an answer ID from 1 to " + options.size() + ": ";
-			int response = clampIndexResponse(1, options.size(), prompt, cli);
-			Option answer = options.get(response);
-			session.setUserAnswer(q, answer);
-			System.out.println(barrier2);
-		}
-		assert(session.solvedAll());
-	}
-
-	public void endOptionsMenu(Scanner cli) {
-		System.out.println(endOptions);
-		int choice = clampIndexResponse(1, 4, endOptsPrompt, cli);
-		if (choice == 0) {
-			displayExplanations(cli);
-		} else if (choice == 1) {
-			this.run();
-			return;
-		} else if (choice == 2) {
-			displayDashboard(cli);
-		}
-	}
-
-	// ======================  TODO  ===================================
-	public void displayExplanations(Scanner cli) {
-        System.out.println("\ntesting explanation");
+        int missed = totalQuestions - userScore;
+        System.out.println("\n***  Your score in this session:  " + userScore + " correct / "
+                           + missed + " missed  ***");
 
         endOptionsMenu(cli);
-	}
+        System.out.println(thanksMsg + barrier1);
+        try {
+            cli.close();
+        } catch (IllegalStateException e) {}
+        return;
+    }
 
-	public void displayDashboard(Scanner cli) {
-		System.out.println("\nGeeQuiz: Dashboard");
-		int count = 1;
-		for (String category : dashReport.keySet()) {
-			System.out.printf("\t%d) %s %8s\n", count, category, dashReport.get(category));
-			count++;
-		}
-		System.out.println("\nPress Enter to return to the options menu");
-		try{System.in.read();}
-		catch(Exception e){}
-		endOptionsMenu(cli);
-	}
+    public boolean determineShortSession(Scanner cli) {
+        System.out.print(sessionTypePrompt);
+        String sessType = cli.next();
+        while (!"L".equalsIgnoreCase(sessType) && !"S".equalsIgnoreCase(sessType)) {
+            System.out.print(sessionTypePrompt);
+            sessType = cli.next();
+        }
+        return "S".equalsIgnoreCase(sessType);
+    }
 
-	// ======================  TODO  ===================================
+    public String displayCategoryMenu(Scanner cli) {
+        List<String> categories = db.getQuestionCategories();
+        int categoryNumber = 1;
+        System.out.println(barrier1 + welcomeMsg);
+        for (String cat : categories) {
+            String prefix = categoryNumber < 10 ? (" \t" + categoryNumber + ")   ")
+            : ("\t" + categoryNumber + ")  ");
+            System.out.println(prefix + cat);
+            categoryNumber++;
+        }
+        categoryNumber--;
+        String prompt = "Please enter a category ID from 1 to " + categoryNumber + ": ";
+        int categoryId = clampIndexResponse(1, categoryNumber, prompt, cli);
+        System.out.println(barrier2);
+        return categories.get(categoryId);
+    }
 
-	// min and max are both exclusive, so (min=1, max=10) will return an index of [0 : 9]
-	public int clampIndexResponse(int min, int max, String prompt, Scanner cli) {
-		int response;
-		do {
-			try {
-				System.out.print(prompt);
-				response = Integer.parseInt(cli.next());
-			} catch (NumberFormatException nfe) {
-				response = 0;
-			}
-		} while (response < min || response > max);
-		return response - 1;
-	}
+    public void startQuiz(Scanner cli) {
+        // prompt question (for each session.getQuestions())
+        // take answer input then call session.setUserAnswer(question, answer);
+        int questionNumber = 1;
+        for (Question q : session.getQuestions()) {
+            List<Option> options = q.getOptions();
+            String text = q.getBodyText();
+            System.out.println("Question " + questionNumber + ": ");
+            questionNumber++;
+            //            System.out.println(Arrays.toString(text.split("(?s)(?<=\\G.{50})") + "\n"));
+            if (text.length() > 80) {
+                for (String line : splitTextEqually(text, 80)) {
+                    System.out.println(" " + line);
+                }
+                System.out.println();
+            } else {
+                System.out.println(" " + text + "\n");
+            }
+            int optionNumber = 1;
+            for (Option o : options) {
+                System.out.println("\t" + optionNumber + ".)  " + o.getOptionText());
+                optionNumber++;
+            }
+            String prompt = "\nPlease enter an answer ID from 1 to " + options.size() + ": ";
+            int response = clampIndexResponse(1, options.size(), prompt, cli);
+            Option answer = options.get(response);
+            session.setUserAnswer(q, answer);
+            System.out.println(barrier2);
+        }
+        assert(session.solvedAll());
+    }
 
-	// TODO: Maybe clean up how this handles specially formatted question body segments
-	public List<String> splitTextEqually(String text, int size) {
-		List<String> ret = new ArrayList<>((text.length() + size - 1) / size);
+    public void endOptionsMenu(Scanner cli) {
+        System.out.println(endOptions);
+        int choice = clampIndexResponse(1, 4, endOptsPrompt, cli);
+        if (choice == 0) {
+            displayExplanations(cli);
+        } else if (choice == 1) {
+            this.run();
+            return;
+        } else if (choice == 2) {
+            displayDashboard(cli);
+        }
+    }
 
-		for (int start = 0; start < text.length(); start += size) {
-			ret.add(text.substring(start, Math.min(text.length(), start + size)));
-		}
-		return ret;
-	}
+    public void displayExplanations(Scanner cli) {
+        System.out.println("\n"+barrier2+"GeeQuiz: Explanations for Missed Questions");
+        int missedQNumber = 1;
+        for (Question q : session.getQuestions()) {
+            Option userAnswer = session.getUserAnswer(q);
+            if (!userAnswer.isCorrect()) {
+                System.out.printf("Question %d)\n", missedQNumber);
+                String text = " ";
+                if (q.getBodyText().length() > 80) {
+                    for (String line : splitTextEqually(q.getBodyText(), 80)) {
+                        text += line + "\n";
+                    }
+                } else {
+                    text = q.getBodyText() + "\n";
+                }
+                System.out.println(text);
+                Option correctAnswer = null;
+                int optionNumber = 1;
+                for (Option o : q.getOptions()) {
+                    if (o.isCorrect()) {
+                        correctAnswer = o;
+                    }
+                    System.out.println("\t" + optionNumber + ".)  " + o.getOptionText());
+                    optionNumber++;
+                }
+                String expl = " ";
+                if (q.getExplanation().length() > 80) {
+                    for (String line : splitTextEqually(q.getExplanation(), 80)) {
+                        expl += line + "\n";
+                    }
+                } else {
+                    expl = q.getExplanation();
+                }
+                System.out.printf("\n\nYou answered:\n\t%s\n\nCorrect answer:"
+                                  + "\n\t%s\n\nExplanation:\n\t%s\n\n",
+                                  userAnswer.getOptionText(),
+                                  correctAnswer.getOptionText(),
+                                  expl);
+                System.out.println("\nPress Enter for next missed question");
+                try{System.in.read();}
+                catch(Exception e){}
+                System.out.println(barrier2);
+            }
+            missedQNumber++;
+        }
+        System.out.println("\nPress Enter to return to the options menu");
+        try{System.in.read();}
+        catch(Exception e){}
+        endOptionsMenu(cli);
+    }
+
+    public void displayDashboard(Scanner cli) {
+        System.out.println("\nGeeQuiz: Dashboard");
+        int count = 1;
+        for (String category : dashReport.keySet()) {
+            System.out.printf("\t%d) %s %8s\n", count, category, dashReport.get(category));
+            count++;
+        }
+        System.out.println("\nPress Enter to return to the options menu");
+        try{System.in.read();}
+        catch(Exception e){}
+        endOptionsMenu(cli);
+    }
+
+    // min and max are both exclusive, so (min=1, max=10) will return an index of [0 : 9]
+    public int clampIndexResponse(int min, int max, String prompt, Scanner cli) {
+        int response;
+        do {
+            try {
+                System.out.print(prompt);
+                response = Integer.parseInt(cli.next());
+            } catch (NumberFormatException nfe) {
+                response = 0;
+            }
+        } while (response < min || response > max);
+        return response - 1;
+    }
+
+    // TODO: Maybe clean up how this handles specially formatted question body segments
+    public List<String> splitTextEqually(String text, int size) {
+        List<String> ret = new ArrayList<>((text.length() + size - 1) / size);
+
+        for (int start = 0; start < text.length(); start += size) {
+            ret.add(text.substring(start, Math.min(text.length(), start + size)));
+        }
+        return ret;
+    }
 }
